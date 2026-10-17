@@ -1,0 +1,297 @@
+{% extends "base.html" %}
+{% block title %}Ro'yxatdan o'tish | Maktab{% endblock %}
+
+{% block extra_css %}
+<style>
+    body { display: grid; place-items: center; padding: 24px; }
+
+    .auth-wrap {
+        width: min(1080px, 100%);
+        display: grid;
+        grid-template-columns: .95fr 1.05fr;
+        background: #fff;
+        border: 1px solid var(--line);
+        border-radius: 28px;
+        box-shadow: 0 30px 70px rgba(24, 42, 84, .16);
+        overflow: hidden;
+        animation: rise .5s cubic-bezier(.22, .8, .3, 1) both;
+    }
+
+    .auth-aside {
+        position: relative;
+        overflow: hidden;
+        padding: 48px 42px;
+        color: #fff;
+        background: linear-gradient(150deg, #17275e 0%, #2749b6 55%, #3f73ff 100%);
+        display: flex;
+        flex-direction: column;
+        justify-content: space-between;
+        gap: 34px;
+    }
+
+    .auth-aside::after {
+        content: "";
+        position: absolute;
+        width: 300px;
+        height: 300px;
+        right: -110px;
+        bottom: -130px;
+        border-radius: 50%;
+        border: 40px solid rgba(255, 255, 255, .07);
+    }
+
+    .auth-aside::before {
+        content: "";
+        position: absolute;
+        width: 170px;
+        height: 170px;
+        left: -70px;
+        top: -60px;
+        border-radius: 50%;
+        background: rgba(255, 255, 255, .07);
+    }
+
+    .auth-aside > * { position: relative; z-index: 1; }
+
+    .aside-logo {
+        display: inline-flex;
+        align-items: center;
+        gap: 12px;
+        font-size: 17px;
+        font-weight: 800;
+        letter-spacing: -.3px;
+    }
+
+    .aside-logo span {
+        display: grid;
+        width: 46px;
+        height: 46px;
+        place-items: center;
+        border-radius: 14px;
+        background: rgba(255, 255, 255, .16);
+        border: 1px solid rgba(255, 255, 255, .22);
+        font-size: 22px;
+    }
+
+    .aside-title {
+        font-size: clamp(28px, 3.4vw, 38px);
+        font-weight: 800;
+        line-height: 1.12;
+        letter-spacing: -1.2px;
+    }
+
+    .aside-copy {
+        margin-top: 14px;
+        color: rgba(255, 255, 255, .78);
+        font-size: 14.5px;
+        line-height: 1.7;
+        max-width: 380px;
+    }
+
+    .aside-points { display: grid; gap: 13px; }
+
+    .aside-point {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        font-size: 14px;
+        font-weight: 600;
+        color: rgba(255, 255, 255, .92);
+    }
+
+    .aside-point i {
+        display: grid;
+        width: 26px;
+        height: 26px;
+        place-items: center;
+        flex-shrink: 0;
+        border-radius: 9px;
+        background: rgba(255, 255, 255, .15);
+        font-style: normal;
+        font-size: 13px;
+    }
+
+    .auth-form-side { padding: 46px 42px; display: flex; flex-direction: column; justify-content: center; }
+
+    .form-head { margin-bottom: 24px; }
+    .form-head h1 { font-size: 26px; font-weight: 800; letter-spacing: -.8px; }
+    .form-head p { margin-top: 6px; color: var(--muted); font-size: 14px; line-height: 1.55; }
+
+    .social-login { display: grid; gap: 10px; }
+
+    .social-btn {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 10px;
+        width: 100%;
+        padding: 13px 16px;
+        border: 1.5px solid var(--line);
+        border-radius: 12px;
+        background: #fff;
+        color: var(--ink);
+        text-decoration: none;
+        font-size: 14px;
+        font-weight: 700;
+        transition: transform .18s ease, border-color .18s ease, box-shadow .18s ease;
+    }
+
+    .social-btn:hover {
+        transform: translateY(-2px);
+        border-color: #cfd9f0;
+        box-shadow: 0 10px 22px rgba(24, 42, 84, .1);
+    }
+
+    .social-btn img { width: 22px; height: 22px; object-fit: contain; }
+    .social-btn.github { background: #1f2937; color: #fff; border-color: #1f2937; }
+    .social-btn.github img { filter: invert(1); }
+
+    .signup-details {
+        margin-top: 18px;
+        border-top: 1px solid var(--line);
+        padding-top: 14px;
+    }
+
+    .signup-details summary {
+        color: var(--muted);
+        cursor: pointer;
+        font-size: 13px;
+        font-weight: 700;
+        text-align: center;
+        list-style: none;
+        padding: 6px;
+        border-radius: 9px;
+        transition: .18s ease;
+    }
+
+    .signup-details summary::-webkit-details-marker { display: none; }
+    .signup-details summary:hover { color: var(--blue); background: var(--blue-soft); }
+    .signup-details[open] summary { color: var(--blue); }
+    .signup-details form { margin-top: 16px; }
+
+    .form-group { display: grid; gap: 7px; margin-bottom: 15px; }
+
+    .form-group label { font-size: 12px; font-weight: 800; color: var(--muted); text-transform: uppercase; letter-spacing: .6px; }
+
+    .form-group input {
+        width: 100%;
+        padding: 12px 14px;
+        border: 1.5px solid var(--line);
+        border-radius: 11px;
+        background: #fbfcfe;
+        font-size: 14px;
+        color: var(--ink);
+        transition: .18s ease;
+    }
+
+    .form-group input:focus { outline: none; background: #fff; border-color: var(--blue); box-shadow: var(--ring); }
+
+    .signup-details ul { margin: 6px 0 0 18px; color: var(--muted); font-size: 11px; line-height: 1.5; }
+
+    .field-error, .form-error { color: #b91c1c; font-size: 12px; font-weight: 700; }
+
+    .submit-button {
+        width: 100%;
+        margin: 4px 0 4px;
+        padding: 14px 16px;
+        border: 0;
+        border-radius: 12px;
+        color: #fff;
+        background: linear-gradient(135deg, #4478ff, #2c55cc);
+        font-size: 15px;
+        font-weight: 800;
+        cursor: pointer;
+        transition: .2s ease;
+        box-shadow: 0 14px 28px rgba(56, 103, 232, .26);
+    }
+
+    .submit-button:hover { transform: translateY(-2px); box-shadow: 0 20px 34px rgba(56, 103, 232, .32); }
+
+    .approval-note { margin: 16px 0 0; color: var(--muted); font-size: 12px; line-height: 1.55; text-align: center; font-weight: 600; }
+
+    .login-link { display: block; text-align: center; margin-top: 14px; color: var(--blue); text-decoration: none; font-size: 14px; font-weight: 800; }
+    .login-link:hover { text-decoration: underline; }
+
+    @media (max-width: 880px) {
+        .auth-wrap { grid-template-columns: 1fr; }
+        .auth-aside { padding: 34px 28px; }
+        .aside-points { display: none; }
+        .auth-form-side { padding: 34px 26px 40px; }
+    }
+</style>
+{% endblock %}
+
+{% block body %}
+<main class="auth-wrap">
+    <aside class="auth-aside">
+        <div class="aside-logo"><span>🏫</span> Maktab boshqaruvi</div>
+
+        <div>
+            <h2 class="aside-title">Yangi hisob yarating va tizimdan foydalaning</h2>
+            <p class="aside-copy">
+                Google yoki GitHub orqali tez kiring, yoxda parol bilan hisob yarating.
+                Admin tasdiqlagach hisobingiz faollashadi.
+            </p>
+        </div>
+
+        <div class="aside-points">
+            <div class="aside-point"><i>🔐</i> Tezkor va xavfsiz kirish</div>
+            <div class="aside-point"><i>✓</i> Admin tasdig'i bilan faollashadi</div>
+            <div class="aside-point"><i>📊</i> Davomat va fond nazorati</div>
+        </div>
+    </aside>
+
+    <section class="auth-form-side">
+        <div class="form-head">
+            <h1>Ro'yxatdan o'tish</h1>
+            <p>Hisob yaratish uchun quyidagi usullardan birini tanlang</p>
+        </div>
+
+        {% if messages %}
+            <div style="margin-bottom:16px;">
+                {% for message in messages %}
+                    <div class="alert alert-error">{{ message }}</div>
+                {% endfor %}
+            </div>
+        {% endif %}
+
+        <div class="social-login">
+            <a href="{% url 'social_login' 'google' %}" class="social-btn google">
+                <img src="https://cdn.jsdelivr.net/gh/devicons/devicon/icons/google/google-original.svg" alt="">
+                <span>Google bilan kirish</span>
+            </a>
+
+            <a href="{% url 'social_login' 'github' %}" class="social-btn github">
+                <img src="https://cdn.jsdelivr.net/gh/devicons/devicon/icons/github/github-original.svg" alt="">
+                <span>GitHub bilan kirish</span>
+            </a>
+        </div>
+
+        <details class="signup-details">
+            <summary>Parol bilan ro'yxatdan o'tish</summary>
+            <form method="post">
+                {% csrf_token %}
+                {% for field in form %}
+                    <div class="form-group">
+                        <label for="{{ field.id_for_label }}">{{ field.label }}</label>
+                        {{ field }}
+                        {% for error in field.errors %}
+                            <span class="field-error">{{ error }}</span>
+                        {% endfor %}
+                        {% if field.help_text %}
+                            <ul><li>{{ field.help_text|safe }}</li></ul>
+                        {% endif %}
+                    </div>
+                {% endfor %}
+                {% for error in form.non_field_errors %}
+                    <div class="form-error">{{ error }}</div>
+                {% endfor %}
+                <button type="submit" class="submit-button">Hisob yaratish</button>
+            </form>
+        </details>
+
+        <p class="approval-note">Yangi hisob admin tasdiqlagandan keyin faollashadi.</p>
+        <a href="{% url 'login' %}" class="login-link">Hisobingiz bormi? Tizimga kirish</a>
+    </section>
+</main>
+{% endblock %}

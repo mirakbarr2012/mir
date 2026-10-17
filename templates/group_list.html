@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<html lang="uz">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Guruhlar | Maktab</title>
+    <style>
+        :root { --ink:#172033; --muted:#718096; --line:#e7ebf2; --paper:#fff; --bg:#f4f7fb; --blue:#3867e8; --blue-dark:#244cc2; --green:#159a68; --red:#d84b5b; --shadow:0 18px 50px rgba(32,50,86,.09); }
+        * { box-sizing:border-box; }
+        body { margin:0; color:var(--ink); background:var(--bg); font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif; }
+        .page-shell { min-height:100vh; padding:38px 20px 56px; }
+        .dashboard { max-width:1040px; margin:0 auto; }
+        .topbar { display:flex; justify-content:space-between; align-items:center; margin-bottom:30px; }
+        .brand { display:flex; align-items:center; gap:13px; }
+        .brand-mark { display:grid; width:44px; height:44px; place-items:center; color:white; background:var(--blue); border-radius:13px; font-size:21px; font-weight:800; box-shadow:0 8px 18px rgba(56,103,232,.25); }
+        .brand-name { margin:0; font-size:18px; font-weight:800; letter-spacing:-.3px; }
+        .brand-caption { margin:2px 0 0; color:var(--muted); font-size:12px; }
+        .hero { display:flex; justify-content:space-between; align-items:flex-end; gap:25px; padding:31px 34px; color:white; background:linear-gradient(120deg,#203d91,#3867e8); border-radius:22px; box-shadow:var(--shadow); overflow:hidden; position:relative; }
+        .hero::after { content:""; position:absolute; width:240px; height:240px; right:-70px; top:-105px; border:35px solid rgba(255,255,255,.08); border-radius:50%; }
+        .eyebrow { margin:0 0 8px; color:#bfcfff; font-size:12px; font-weight:800; letter-spacing:1.5px; text-transform:uppercase; }
+        h1 { margin:0; font-size:clamp(27px,4vw,40px); letter-spacing:-1.2px; }
+        .button { border:0; border-radius:10px; padding:12px 17px; color:white; background:var(--blue); font-weight:750; cursor:pointer; transition:.2s ease; text-decoration:none; display:inline-block; }
+        .button:hover { background:var(--blue-dark); transform:translateY(-1px); }
+        .button-light { color:var(--blue); background:white; }
+        .button-light:hover { color:var(--blue-dark); background:#f0f4ff; }
+        .content-grid { display:grid; grid-template-columns:290px 1fr; gap:22px; margin-top:22px; }
+        .content-grid.teacher-grid { grid-template-columns:1fr; }
+        .panel { padding:24px; background:var(--paper); border:1px solid var(--line); border-radius:18px; box-shadow:0 8px 25px rgba(32,50,86,.04); }
+        .panel-title { margin:0; font-size:17px; letter-spacing:-.3px; }
+        .panel-copy { margin:7px 0 20px; color:var(--muted); font-size:13px; line-height:1.5; }
+        .group-form { display:grid; gap:11px; }
+        .group-form input { width:100%; padding:12px 13px; background:#fbfcfe; border:1px solid var(--line); border-radius:10px; font:inherit; }
+        .group-form input:focus { border-color:var(--blue); box-shadow:0 0 0 3px rgba(56,103,232,.12); outline:none; }
+        .group-form .button { margin-top:4px; }
+        .group-card { padding:20px; border:1px solid var(--line); border-radius:16px; background:white; transition:.2s ease; }
+        .group-card:hover { border-color:var(--blue); box-shadow:0 8px 25px rgba(56,103,232,.08); }
+        .group-header { display:flex; justify-content:space-between; align-items:flex-start; margin-bottom:14px; }
+        .group-name { margin:0; font-size:20px; font-weight:800; letter-spacing:-.3px; }
+        .group-meta { display:flex; gap:10px; flex-wrap:wrap; margin-bottom:14px; }
+        .meta-badge { font-size:12px; font-weight:700; padding:4px 10px; border-radius:8px; }
+        .meta-students { color:#0369a1; background:#e0f2fe; }
+        .meta-teachers { color:#7c3aed; background:#ede9fe; }
+        .group-actions { display:flex; gap:8px; flex-wrap:wrap; }
+        .action-btn { padding:8px 14px; border-radius:10px; font-size:13px; font-weight:700; text-decoration:none; cursor:pointer; transition:.2s ease; border:0; }
+        .btn-view { color:var(--blue); background:#eaf0ff; }
+        .btn-view:hover { background:#dce6ff; }
+        .btn-delete { color:var(--red); background:#fff0f2; border:1px solid #f2d2d7; }
+        .btn-delete:hover { color:white; background:var(--red); }
+        .empty-state { padding:35px 15px; color:var(--muted); text-align:center; font-size:14px; }
+        .empty-icon { display:block; margin-bottom:8px; font-size:28px; }
+        @media (max-width:760px) {
+            .page-shell { padding:23px 14px 40px; }
+            .topbar, .hero { align-items:flex-start; flex-direction:column; }
+            .topbar { gap:14px; }
+            .hero { padding:25px 22px; }
+            .content-grid { grid-template-columns:1fr; }
+        }
+    </style>
+</head>
+<body>
+    <main class="page-shell">
+        <div class="dashboard">
+            <header class="topbar">
+                <div class="brand">
+                    <div class="brand-mark">G</div>
+                    <div><p class="brand-name">Maktab boshqaruvi</p><p class="brand-caption">Guruhlar boshqaruvi</p></div>
+                </div>
+                <div style="display:flex; align-items:center; gap:12px; flex-wrap:wrap;">
+                    <a href="{% url 'attendance_view' %}" class="button button-light">← Davomatga qaytish</a>
+                    <a href="{% url 'logout' %}" onclick="sessionStorage.clear()" style="padding:8px 14px; background:#fff0f2; color:var(--red); border:1px solid #f2d2d7; border-radius:12px; font-size:13px; font-weight:700; text-decoration:none;">
+                        Chiqish
+                    </a>
+                </div>
+            </header>
+
+            <section class="hero">
+                <div>
+                    <p class="eyebrow">Boshqaruv</p>
+                    <h1>Guruhlar</h1>
+                </div>
+            </section>
+
+            <div class="content-grid {% if not is_admin %}teacher-grid{% endif %}">
+                <!-- Guruh qo'shish -->
+                {% if is_admin %}
+                <aside class="panel">
+                    <h2 class="panel-title">Yangi guruh</h2>
+                    <p class="panel-copy">Yangi guruh yaratish uchun nom kiriting.</p>
+                    <form method="POST" action="" class="group-form">
+                        {% csrf_token %}
+                        <input type="text" name="name" placeholder="Guruh nomi (masalan: 9-A)" required>
+                        <button type="submit" name="add_group" value="1" class="button">+ Guruh yaratish</button>
+                    </form>
+                </aside>
+                {% endif %}
+
+                <!-- Guruhlar ro'yxati -->
+                <section class="panel">
+                    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:18px;">
+                        <h2 class="panel-title">Barcha guruhlar</h2>
+                        <span style="color:var(--muted); font-size:14px; font-weight:700;">{{ groups|length }} ta</span>
+                    </div>
+
+                    {% for group in groups %}
+                    <div class="group-card" style="margin-bottom:14px;">
+                        <div class="group-header">
+                            <h3 class="group-name">{{ group.name }}</h3>
+                            {% if is_admin %}
+                                <form method="POST" action="" style="display:inline;" onsubmit="return confirm('{{ group.name }} guruhini o\'chirishni xohlaysizmi?');">
+                                    {% csrf_token %}
+                                    <input type="hidden" name="delete_group" value="{{ group.id }}">
+                                    <button type="submit" class="action-btn btn-delete">O'chirish</button>
+                                </form>
+                            {% endif %}
+                        </div>
+                        <div class="group-meta">
+                            <span class="meta-badge meta-students">👤 {{ group.students.count }} ta o'quvchi</span>
+                            <span class="meta-badge meta-teachers">👨‍🏫 {{ group.teachers.count }} ta ustoz</span>
+                        </div>
+                        <div class="group-actions">
+                            <a href="{% url 'group_detail' group.id %}" class="action-btn btn-view">Batafsil →</a>
+                        </div>
+                    </div>
+                    {% empty %}
+                    <div class="empty-state">
+                        <span class="empty-icon">📂</span>
+                        Hozircha guruhlar yaratilmagan.
+                    </div>
+                    {% endfor %}
+                </section>
+            </div>
+        </div>
+    </main>
+</body>
+</html>

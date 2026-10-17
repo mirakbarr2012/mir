@@ -1,0 +1,237 @@
+<!DOCTYPE html>
+<html lang="uz">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sinf Fondi | Maktab</title>
+    <style>
+        :root { --ink:#172033; --muted:#718096; --line:#e7ebf2; --paper:#fff; --bg:#f4f7fb; --blue:#3867e8; --blue-dark:#244cc2; --green:#159a68; --red:#d84b5b; --shadow:0 18px 50px rgba(32,50,86,.09); }
+        * { box-sizing:border-box; }
+        body { margin:0; color:var(--ink); background:var(--bg); font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif; }
+        .page-shell { min-height:100vh; padding:38px 20px 56px; }
+        .dashboard { max-width:1040px; margin:0 auto; }
+        .topbar { display:flex; justify-content:space-between; align-items:center; margin-bottom:30px; }
+        .brand { display:flex; align-items:center; gap:13px; }
+        .brand-mark { display:grid; width:44px; height:44px; place-items:center; color:white; background:var(--blue); border-radius:13px; font-size:21px; font-weight:800; box-shadow:0 8px 18px rgba(56,103,232,.25); }
+        .brand-name { margin:0; font-size:18px; font-weight:800; letter-spacing:-.3px; }
+        .brand-caption { margin:2px 0 0; color:var(--muted); font-size:12px; }
+        .hero { display:flex; justify-content:space-between; align-items:flex-end; gap:25px; padding:31px 34px; color:white; background:linear-gradient(120deg,#203d91,#3867e8); border-radius:22px; box-shadow:var(--shadow); overflow:hidden; position:relative; margin-bottom:30px; }
+        .hero::after { content:""; position:absolute; width:240px; height:240px; right:-70px; top:-105px; border:35px solid rgba(255,255,255,.08); border-radius:50%; }
+        .eyebrow { margin:0 0 8px; color:#bfcfff; font-size:12px; font-weight:800; letter-spacing:1.5px; text-transform:uppercase; }
+        h1 { margin:0; font-size:clamp(27px,4vw,40px); letter-spacing:-1.2px; }
+        .hero-date { margin:10px 0 0; color:#d8e2ff; font-size:15px; }
+        .button { border:0; border-radius:10px; padding:12px 17px; color:white; background:var(--blue); font-weight:750; cursor:pointer; transition:.2s ease; display:inline-block; text-decoration:none; font-size:14px; }
+        .button:hover { background:var(--blue-dark); transform:translateY(-1px); }
+        .button-light { color:var(--blue); background:white; }
+        .button-light:hover { color:var(--blue-dark); background:#f0f4ff; }
+        .content-grid { display:grid; grid-template-columns:1fr 1fr; gap:22px; margin-top:22px; }
+        .panel { padding:24px; background:var(--paper); border:1px solid var(--line); border-radius:18px; box-shadow:0 8px 25px rgba(32,50,86,.04); }
+        .panel-title { margin:0; font-size:17px; letter-spacing:-.3px; }
+        .panel-copy { margin:7px 0 20px; color:var(--muted); font-size:13px; line-height:1.5; }
+        .fund-form { display:grid; gap:11px; }
+        .fund-form input, .fund-form select { width:100%; padding:12px 13px; background:#fbfcfe; border:1px solid var(--line); border-radius:10px; font-family:inherit; }
+        .fund-form input:focus, .fund-form select:focus { border-color:var(--blue); box-shadow:0 0 0 3px rgba(56,103,232,.12); outline:none; }
+        .fund-form button { margin-top:4px; }
+        .stats-box { padding:20px; background:linear-gradient(135deg,#dce6ff,#eaf0ff); border-left:4px solid var(--blue); border-radius:13px; margin-bottom:22px; }
+        .stats-label { color:var(--muted); font-size:13px; font-weight:700; text-transform:uppercase; letter-spacing:.5px; margin:0 0 7px; }
+        .stats-value { margin:0; font-size:28px; font-weight:800; color:var(--blue); }
+        .table-container { overflow:hidden; border:1px solid var(--line); border-radius:13px; }
+        .table-header, .table-row { display:grid; grid-template-columns:2fr 1fr 1fr 1.5fr 1.5fr; gap:15px; padding:14px 17px; align-items:center; }
+        .table-header { color:var(--muted); background:#f8faff; font-size:11px; font-weight:800; letter-spacing:.8px; text-transform:uppercase; }
+        .table-row { border-top:1px solid var(--line); transition:background .2s ease; }
+        .table-row:hover { background:#fbfcff; }
+        .empty-state { padding:35px 15px; color:var(--muted); text-align:center; font-size:14px; }
+        .empty-icon { display:block; margin-bottom:8px; font-size:28px; }
+        .list-header { display:flex; justify-content:space-between; align-items:center; margin-bottom:17px; }
+        .list-meta { color:var(--muted); font-size:13px; }
+        .attendance-list { overflow:hidden; border:1px solid var(--line); border-radius:13px; }
+        .list-labels { display:grid; grid-template-columns:1fr 100px; align-items:center; gap:18px; padding:14px 17px; color:var(--muted); background:#f8faff; font-size:11px; font-weight:800; letter-spacing:.8px; text-transform:uppercase; }
+        .student-row { display:grid; grid-template-columns:1fr 100px; align-items:center; gap:18px; padding:14px 17px; border-top:1px solid var(--line); transition:background .2s ease; }
+        .student-row:hover { background:#fbfcff; }
+        .student-number { display:inline-grid; width:30px; height:30px; margin-right:10px; place-items:center; color:var(--blue); background:#eaf0ff; border-radius:9px; font-size:12px; font-weight:800; }
+        .student-name { font-weight:700; }
+        .delete-button { padding:6px 10px; color:var(--red); border:1px solid #f2d2d7; border-radius:8px; background:#fff7f8; font-size:12px; font-weight:700; cursor:pointer; }
+        .delete-button:hover { color:white; background:var(--red); }
+        .modal { display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,.5); z-index:1000; align-items:center; justify-content:center; }
+        .modal.active { display:flex; }
+        .modal-content { background:white; padding:30px; border-radius:15px; max-width:500px; width:90%; box-shadow:var(--shadow); }
+        .modal-title { margin:0 0 20px; font-size:20px; font-weight:800; }
+        .modal-form { display:grid; gap:13px; }
+        .modal-buttons { display:grid; grid-template-columns:1fr 1fr; gap:12px; margin-top:20px; }
+        .modal-buttons button { padding:12px; border:0; border-radius:10px; font-weight:700; cursor:pointer; }
+        .modal-cancel { background:#f0f4ff; color:var(--blue); }
+        .modal-cancel:hover { background:#dce6ff; }
+        @media (max-width:760px) {
+            .page-shell { padding:23px 14px 40px; }
+            .topbar { flex-direction:column; align-items:flex-start; gap:14px; }
+            .hero { flex-direction:column; align-items:flex-start; padding:25px 22px; }
+            .content-grid { grid-template-columns:1fr; }
+            .table-header, .table-row { grid-template-columns:1fr; gap:10px; }
+            .list-labels, .student-row { grid-template-columns:1fr; gap:10px; }
+        }
+    </style>
+</head>
+<body>
+    <main class="page-shell">
+        <div class="dashboard">
+            <header class="topbar">
+                <div class="brand"><div class="brand-mark">💰</div><div><p class="brand-name">Maktab boshqaruvi</p><p class="brand-caption">Sinf fondi hisoboti</p></div></div>
+                <div style="display:flex; align-items:center; gap:12px; flex-wrap:wrap;">
+                    <span style="display:inline-flex; align-items:center; gap:6px; background:white; padding:8px 14px; border:1px solid var(--line); border-radius:12px; font-size:13px; font-weight:700; color:var(--ink);">
+                        👤 {{ request.user.username }}
+                    </span>
+                    <a href="{% url 'attendance_view' %}" class="button button-light">← Davomatga qaytish</a>
+                    <a href="{% url 'logout' %}" onclick="sessionStorage.clear()" style="padding:11px 15px; background:#fff0f2; color:var(--red); border:1px solid #f2d2d7; border-radius:10px; font-size:13px; font-weight:700; text-decoration:none;">
+                        Chiqish
+                    </a>
+                </div>
+            </header>
+            <section class="hero">
+                <div><p class="eyebrow">Kassa boshqaruvi</p><h1>Sinf fondi</h1><p class="hero-date">{{ current_time|date:'d.m.Y H:i' }}</p></div>
+            </section>
+            <div class="stats-box">
+                <p class="stats-label">Umumiy yig'ilgan mablag'</p>
+                <p class="stats-value">{{ total_fund }} so'm</p>
+            </div>
+            <section class="panel">
+                <div class="list-header"><h2 class="panel-title">Sinf o'quvchilari</h2><span class="list-meta">{{ students|length }} nafar o'quvchi</span></div>
+                <form method="POST" class="attendance-list">
+                    {% csrf_token %}
+                    <div class="list-labels"><span>O'quvchi</span><span>Amallar</span></div>
+                    {% for student in students %}
+                    <div class="student-row">
+                        <div><span class="student-number">{{ forloop.counter }}</span><span class="student-name">{{ student.first_name }} {{ student.last_name }}</span></div>
+                        <button type="submit" name="delete_student" value="{{ student.id }}" class="delete-button" onclick="return confirm('Bu o\'quvchini o\'chirishni xohlaysizmi?');">O'chirish</button>
+                    </div>
+                    {% empty %}
+                    <div class="empty-state"><span class="empty-icon">○</span>Hozircha o'quvchilar qo'shilmagan.</div>
+                    {% endfor %}
+                </form>
+            </section>
+            <div class="content-grid">
+                <aside class="panel">
+                    <h2 class="panel-title">Pul topshirishni qo'shish</h2>
+                    <p class="panel-copy">Yangi pul tushumasini yozing</p>
+                    <form method="POST" class="fund-form">
+                        {% csrf_token %}
+                        <input type="hidden" name="add_fund" value="1">
+                        <select name="student_id" required>
+                            <option value="">-- O'quvchi tanlang --</option>
+                            {% for student in students %}
+                                <option value="{{ student.id }}">{{ student.first_name }} {{ student.last_name }}</option>
+                            {% endfor %}
+                        </select>
+                        <input type="number" name="amount" placeholder="Summa (so'mda)" required>
+                        <select name="month" required>
+                            <option value="">-- Oyni tanlang --</option>
+                            <option value="1">Yanvar</option>
+                            <option value="2">Fevral</option>
+                            <option value="3">Mart</option>
+                            <option value="4">Aprel</option>
+                            <option value="5">May</option>
+                            <option value="6">Iyun</option>
+                            <option value="7">Iyul</option>
+                            <option value="8">Avgust</option>
+                            <option value="9">Sentabr</option>
+                            <option value="10">Oktabr</option>
+                            <option value="11">Noyabr</option>
+                            <option value="12">Dekabr</option>
+                        </select>
+                        <input type="text" name="description" placeholder="Izoh (ixtiyoriy)">
+                        <button type="submit" class="button">+ Fondga qo'shish</button>
+                    </form>
+                </aside>
+                <section class="panel">
+                    <h2 class="panel-title">Tushumlar tarixi</h2>
+                    <div class="table-container">
+                        <div class="table-header">
+                            <span>O'quvchi</span>
+                            <span>Oy</span>
+                            <span>Summa</span>
+                            <span>Izoh</span>
+                            <span>Amallar</span>
+                        </div>
+                        {% for record in fund_history %}
+                        <div class="table-row">
+                            <span>{{ record.student.first_name }} {{ record.student.last_name }}</span>
+                            <span style="font-weight:700;">{{ record.get_month_display }}</span>
+                            <span style="color:var(--green);font-weight:800;">+{{ record.amount }} so'm</span>
+                            <span style="color:var(--muted);">{{ record.description|default:"-" }}</span>
+                            <span style="display:flex;gap:8px;">
+                                
+                                <form method="post" action="{% url 'fund_delete' record.id %}">
+                                    {% csrf_token %}
+                                    <button type="submit" class="delete-button" onclick="return confirm('Bu yozuvni o\'chirishni xohlaysizmi?')">O'chirish</button>
+                                </form>
+                                <button class="button button-light" onclick="editFund('{{ record.id }}', '{{ record.month }}', '{{ record.amount }}', '{{ record.description|escapejs }}')">Tahrirlash</button>
+
+                            </span>
+                        </div>
+                        {% empty %}
+                        <div class="empty-state"><span class="empty-icon">○</span>Hozircha pul kelib tushmagan.</div>
+                        {% endfor %}
+                    </div>
+                </section>
+            </div>
+        </div>
+    </main>
+
+    <!-- Tahrirlash modal -->
+    <div id="editModal" class="modal">
+        <div class="modal-content">
+            <h2 class="modal-title">Pul yozuvasini tahrirlash</h2>
+            <form method="POST" class="modal-form">
+                {% csrf_token %}
+                <input type="hidden" name="edit_fund" value="1">
+                <input type="hidden" id="fundId" name="fund_id">
+                <select id="monthSelect" name="month" required>
+                    <option value="">-- Oyni tanlang --</option>
+                    <option value="1">Yanvar</option>
+                    <option value="2">Fevral</option>
+                    <option value="3">Mart</option>
+                    <option value="4">Aprel</option>
+                    <option value="5">May</option>
+                    <option value="6">Iyun</option>
+                    <option value="7">Iyul</option>
+                    <option value="8">Avgust</option>
+                    <option value="9">Sentabr</option>
+                    <option value="10">Oktabr</option>
+                    <option value="11">Noyabr</option>
+                    <option value="12">Dekabr</option>
+                </select>
+                <input type="number" id="amountInput" name="amount" placeholder="Summa (so'mda)" required>
+                <input type="text" id="descriptionInput" name="description" placeholder="Izoh (ixtiyoriy)">
+                <div class="modal-buttons">
+                    <button type="button" class="modal-cancel" onclick="closeModal()">Bekor qilish</button>
+                    <button type="submit" class="button">Saqlash</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+
+    <script>
+        function editFund(id, month, amount, description) {
+            document.getElementById('fundId').value = id;
+            document.getElementById('monthSelect').value = month;
+            document.getElementById('amountInput').value = amount;
+            document.getElementById('descriptionInput').value = description;
+            document.getElementById('editModal').classList.add('active');
+        }
+
+        function closeModal() {
+            document.getElementById('editModal').classList.remove('active');
+        }
+
+        window.onclick = function(event) {
+            const modal = document.getElementById('editModal');
+            if (event.target == modal) {
+                modal.classList.remove('active');
+            }
+        }
+
+
+        
+    </script>
+</body>
+</html>

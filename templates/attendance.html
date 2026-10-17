@@ -1,0 +1,311 @@
+{% extends "base.html" %}
+{% block title %}Davomat | Maktab{% endblock %}
+
+{% block extra_css %}
+<style>
+    .date-form { display:flex; gap:9px; position:relative; z-index:1; }
+
+    input[type="date"] {
+        padding: 12px 14px;
+        border: 1.5px solid var(--line);
+        border-radius: 11px;
+        outline: none;
+        color: var(--ink);
+        background: #fff;
+        font-size: 14px;
+        font-weight: 600;
+    }
+
+    input[type="date"]:focus { border-color: var(--blue); box-shadow: var(--ring); }
+
+    .student-actions { display: flex; align-items: center; gap: 9px; flex-wrap: wrap; }
+
+    .filter-bar {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        flex-wrap: wrap;
+        margin-bottom: 18px;
+        padding: 14px 16px;
+        background: #f7faff;
+        border: 1px solid var(--line);
+        border-radius: 14px;
+    }
+
+    .filter-bar label { font-weight: 800; font-size: 13px; color: var(--ink); white-space: nowrap; }
+
+    .filter-bar select {
+        padding: 9px 13px;
+        border-radius: 10px;
+        border: 1.5px solid var(--line);
+        background: #fff;
+        font-weight: 700;
+        font-size: 14px;
+        outline: none;
+        cursor: pointer;
+        color: var(--ink);
+        transition: .18s ease;
+    }
+
+    .filter-bar select:focus { border-color: var(--blue); box-shadow: var(--ring); }
+
+    .attendance-list { overflow: hidden; border: 1px solid var(--line); border-radius: var(--radius-md); }
+
+    .status-controls { display: flex; justify-content: flex-end; }
+    .status-controls label { cursor: pointer; }
+    .status-controls input[type="radio"] { position: absolute; opacity: 0; width: 1px; height: 1px; }
+
+    .status-controls span {
+        display: block;
+        padding: 11px 19px;
+        color: var(--muted);
+        border: 1.5px solid var(--line);
+        font-size: 13.5px;
+        font-weight: 800;
+        transition: .18s ease;
+        user-select: none;
+        background: #fff;
+    }
+
+    .status-controls label:first-child span { border-radius: 11px 0 0 11px; }
+    .status-controls label:last-child span { margin-left: -1.5px; border-radius: 0 11px 11px 0; }
+    .status-controls label:hover span { color: var(--ink); background: #fbfcff; }
+    .status-controls input[type="radio"]:checked + span { color: #fff; }
+    .present-radio:checked + span { background: var(--green); border-color: var(--green); box-shadow: 0 8px 18px rgba(18,153,106,.24); }
+    .absent-radio:checked + span { background: var(--red); border-color: var(--red); box-shadow: 0 8px 18px rgba(216,75,91,.22); }
+
+    .save-row { display: flex; justify-content: flex-end; margin-top: 20px; }
+
+    .save-button {
+        padding: 15px 40px;
+        background: linear-gradient(135deg, #1c2942, #101827);
+        font-size: 15.5px;
+        border-radius: 13px;
+        box-shadow: 0 14px 28px rgba(16, 24, 39, .24);
+    }
+
+    .save-button:hover { box-shadow: 0 20px 34px rgba(16, 24, 39, .3); }
+
+    @media (max-width: 760px) {
+        .date-form { width: 100%; flex-wrap: wrap; }
+        .date-form input[type="date"] { flex: 1; min-width: 160px; }
+        .save-button { width: 100%; }
+    }
+</style>
+{% endblock %}
+
+{% block body %}
+<main class="page-shell">
+    <div class="dashboard">
+        <header class="topbar">
+            <div class="brand">
+                <div class="brand-mark">✓</div>
+                <div><p class="brand-name">Maktab boshqaruvi</p><p class="brand-caption">Elektron davomat tizimi</p></div>
+            </div>
+            <div class="topbar-actions">
+                <div class="date-badge">{{ selected_date|date:'d.m.Y' }}</div>
+                <span class="chip chip-blue">👨‍🏫 Ustoz: {{ current_teacher.full_name }}</span>
+                <a href="{% url 'complaint' %}" class="chip chip-blue">📩 Murojaat qilish</a>
+                <a href="{% url 'logout' %}" onclick="sessionStorage.clear()" class="chip chip-red">Chiqish</a>
+            </div>
+        </header>
+
+        <section class="hero">
+            <div>
+                <p class="eyebrow">Bugungi nazorat</p>
+                <h1>Sinf davomati</h1>
+                <p class="hero-date">{{ formatted_date }}</p>
+            </div>
+            <form method="GET" class="date-form">
+                <input type="date" name="date" value="{{ selected_date|date:'Y-m-d' }}" aria-label="Sanani tanlang">
+                <button type="submit" class="button button-light">Ko'rish</button>
+            </form>
+        </section>
+
+        <div class="content-grid {% if not is_admin %}teacher-grid{% endif %}">
+                <!-- O'quvchi qo'shish -->
+                {% if is_admin %}
+                <aside class="panel">
+                    <h2 class="panel-title">O'quvchi qo'shish</h2>
+                    <p class="panel-copy">Sinf ro'yxatiga yangi o'quvchini kiriting.</p>
+                    <form method="POST" action="" class="field-stack">
+                        {% csrf_token %}
+                        <input type="hidden" name="date" value="{{ selected_date|date:'Y-m-d' }}">
+                        <input type="hidden" name="current_group_filter" value="{{ group_filter_id|default:'' }}">
+                        <input type="text" name="first_name" placeholder="Ismi" required>
+                        <input type="text" name="last_name" placeholder="Familiyasi" required>
+                        {% if groups %}
+                        <select name="group_id">
+                            <option value="">Guruhni tanlang (Ixtiyoriy)</option>
+                            {% for g in groups %}
+                            <option value="{{ g.id }}">{{ g.name }}</option>
+                            {% endfor %}
+                        </select>
+                        {% endif %}
+                        <button type="submit" name="add_student" value="1" class="button" style="margin-top:4px;">+ O'quvchi qo'shish</button>
+                    </form>
+                </aside>
+                {% endif %}
+
+                <!-- Davomat ro'yxati -->
+                <section class="panel">
+                    <div class="panel-head">
+                        <h2 class="panel-title">Sinf ro'yxati</h2>
+                        <div class="student-actions">
+                            <a href="{% url 'attendance_history' %}" class="button-soft button" style="padding:10px 15px;">📋 Saqlangan davomat</a>
+                            {% if is_admin %}<a href="{% url 'fund_view' %}" class="button-soft button" style="padding:10px 15px;">💰 Fond</a>{% endif %}
+                            <a href="{% url 'group_list' %}" class="button-soft button" style="padding:10px 15px;">👥 Guruhlar</a>
+                            <span class="list-meta">{{ student_list|length }} nafar</span>
+                        </div>
+                    </div>
+
+                    <!-- Davomat saqlash formasi -->
+                    <form method="POST" action="" id="attendanceForm">
+                        {% csrf_token %}
+                        <input type="hidden" name="save_attendance" value="1">
+                        <input type="hidden" name="date" value="{{ selected_date|date:'Y-m-d' }}">
+                        <input type="hidden" name="filter_group_id" value="{{ group_filter_id|default:'' }}">
+
+                        <div class="filter-bar">
+                            {% if is_admin %}
+                                <label for="teacher_id">👨‍🏫 Davomat qilayotgan ustoz:</label>
+                                <select name="teacher_id" id="teacher_id">
+                                    {% for teacher in active_teachers %}
+                                        <option value="{{ teacher.id }}" {% if teacher.id == current_teacher.id %}selected{% endif %}>
+                                            {{ teacher.full_name }}
+                                        </option>
+                                    {% empty %}
+                                        <option value="{{ current_teacher.id }}">{{ current_teacher.full_name }}</option>
+                                    {% endfor %}
+                                </select>
+                            {% else %}
+                                <span style="font-weight:800; font-size:13px;">👨‍🏫 Davomat qilayotgan ustoz: {{ current_teacher.full_name }}</span>
+                            {% endif %}
+
+                            <label>👥 Guruh:</label>
+                            <select id="groupFilterSelect">
+                                <option value="">📚 Barcha guruhlar</option>
+                                {% for g in groups %}
+                                    <option value="{{ g.id }}" {% if group_filter_id == g.id|stringformat:"s" %}selected{% endif %}>
+                                        {{ g.name }}
+                                    </option>
+                                {% endfor %}
+                            </select>
+                            {% if selected_group %}
+                            <a href="{% url 'attendance_view' %}?date={{ selected_date|date:'Y-m-d' }}" class="btn-mini btn-mini-danger">✕ Tozalash</a>
+                            {% endif %}
+                        </div>
+
+                        {% if messages %}
+                        <div style="margin-bottom:18px;">
+                            {% for message in messages %}
+                            <div class="alert alert-{% if message.tags == 'success' %}success{% else %}error{% endif %}">
+                                {{ message }}
+                            </div>
+                            {% endfor %}
+                        </div>
+                        {% endif %}
+
+                        <div class="attendance-list" id="attendanceList">
+                            <div class="list-labels">
+                                <span>O'quvchi</span>
+                                <span>Davomat holati</span>
+                            </div>
+                            {% for student in student_list %}
+                            <div class="student-row">
+                                <div class="student-info">
+                                    <span class="student-number">{{ forloop.counter }}</span>
+                                    <div style="display:flex; flex-direction:column; gap:4px; min-width:0;">
+                                        <span class="student-name">{{ student.full_name }}</span>
+                                        {% if student.group_name %}
+                                        <span class="meta-badge meta-group" style="width:fit-content;">{{ student.group_name }}</span>
+                                        {% endif %}
+                                    </div>
+                                    {% if is_admin %}
+                                        <button type="button" class="btn-mini btn-mini-danger"
+                                            onclick="deleteStudent('{{ student.id }}', '{{ selected_date|date:"Y-m-d" }}', '{{ student.full_name|escapejs }}')">
+                                            O'chirish
+                                        </button>
+                                    {% endif %}
+                                </div>
+                                <div class="status-controls">
+                                    <label>
+                                        <input type="radio" name="status_{{ student.id }}" value="present"
+                                            {% if student.is_present %}checked{% endif %} class="present-radio">
+                                        <span>✓ Keldi</span>
+                                    </label>
+                                    <label>
+                                        <input type="radio" name="status_{{ student.id }}" value="absent"
+                                            {% if not student.is_present %}checked{% endif %} class="absent-radio">
+                                        <span>× Kelmadi</span>
+                                    </label>
+                                </div>
+                            </div>
+                            {% empty %}
+                            <div class="empty-state">
+                                <span class="empty-icon">🧑‍🎓</span>
+                                Hozircha o'quvchilar qo'shilmagan.
+                            </div>
+                            {% endfor %}
+                        </div>
+
+                        {% if student_list %}
+                        <div class="save-row">
+                            <button type="submit" class="button save-button">✓ Davomatni saqlash</button>
+                        </div>
+                        {% endif %}
+                    </form>
+
+                    <!-- O'chirish uchun yashirin forma -->
+                    {% if is_admin %}
+                        <form method="POST" action="" id="deleteStudentForm" style="display:none;">
+                            {% csrf_token %}
+                            <input type="hidden" name="delete_student" id="deleteStudentId">
+                            <input type="hidden" name="date" id="deleteStudentDate">
+                            <input type="hidden" name="current_group_filter" value="{{ group_filter_id|default:'' }}">
+                        </form>
+                    {% endif %}
+                </section>
+            </div>
+        </div>
+    </main>
+{% endblock %}
+
+{% block extra_js %}
+    <script>
+        function deleteStudent(studentId, date, name) {
+            if (confirm(name + " ni o'chirishni xohlaysizmi?")) {
+                document.getElementById('deleteStudentId').value = studentId;
+                document.getElementById('deleteStudentDate').value = date;
+                document.getElementById('deleteStudentForm').submit();
+            }
+        }
+
+        // Guruh tanlanganda sahifani yangilash
+        document.addEventListener('DOMContentLoaded', function() {
+            var groupFilter = document.getElementById('groupFilterSelect');
+            if (groupFilter) {
+                groupFilter.addEventListener('change', function() {
+                    var groupId = this.value;
+                    var date = '{{ selected_date|date:"Y-m-d" }}';
+                    if (groupId) {
+                        window.location.href = '?date=' + date + '&group_id=' + groupId;
+                    } else {
+                        window.location.href = '?date=' + date;
+                    }
+                });
+            }
+        });
+
+        // Sahifa yuklanganda, agar guruh tanlangan bo'lsa, unga scroll qilish
+        document.addEventListener('DOMContentLoaded', function() {
+            var groupFilter = document.getElementById('groupFilterSelect');
+            if (groupFilter && groupFilter.value) {
+                var attendanceList = document.getElementById('attendanceList');
+                if (attendanceList) {
+                    attendanceList.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                }
+            }
+        });
+    </script>
+{% endblock %}
